@@ -9,6 +9,8 @@ const { hashElement } = require('folder-hash');
 const MergeJsonWebpackPlugin = require('merge-jsons-webpack-plugin');
 const utils = require('./utils.js');
 const environment = require('./environment');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const getTsLoaderRule = () => {
   const rules = [
@@ -99,6 +101,7 @@ module.exports = async options => {
           DEVELOPMENT: JSON.stringify(development),
           VERSION: JSON.stringify(environment.VERSION),
           SERVER_API_URL: JSON.stringify(environment.SERVER_API_URL),
+          'process.env': JSON.stringify(process.env),
         }),
         new ESLintPlugin({
           configType: 'flat',
