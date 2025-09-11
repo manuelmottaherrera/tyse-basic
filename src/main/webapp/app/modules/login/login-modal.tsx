@@ -4,6 +4,9 @@ import { Alert, Button, Col, Form, Modal, ModalBody, ModalFooter, ModalHeader, R
 import { Link } from 'react-router-dom';
 import { type FieldError, useForm } from 'react-hook-form';
 
+import useRecaptcha from 'app/shared/custom-hooks/recaptcha/useRecaptcha';
+import BrandLogo from 'app/shared/components/brand-logo/brand-logo';
+
 export interface ILoginModalProps {
   showModal: boolean;
   loginError: boolean;
@@ -12,15 +15,23 @@ export interface ILoginModalProps {
 }
 
 const LoginModal = (props: ILoginModalProps) => {
-  const login = ({ username, password, rememberMe }) => {
-    props.handleLogin(username, password, rememberMe);
-  };
-
+  const { verifyRecaptcha, isLoadingRecaptcha, errorRecaptcha } = useRecaptcha('login');
   const {
     handleSubmit,
     register,
-    formState: { errors, touchedFields },
+    formState: { errors, touchedFields, isSubmitting },
+    setError,
   } = useForm({ mode: 'onTouched' });
+
+  const login = async ({ username, password, rememberMe }) => {
+    const validRecaptcha: boolean = await verifyRecaptcha();
+    if (errorRecaptcha) {
+      setError('root.recaptcha', { type: 'manual', message: errorRecaptcha || 'reCaptcha no válido' });
+    }
+    if (validRecaptcha === true) {
+      props.handleLogin(username, password, rememberMe);
+    }
+  };
 
   const { loginError, handleClose } = props;
 
@@ -37,11 +48,19 @@ const LoginModal = (props: ILoginModalProps) => {
         <ModalBody>
           <Row>
             <Col md="12">
+              <BrandLogo />
+            </Col>
+            <Col md="12">
               {loginError ? (
-                <Alert color="danger" data-cy="loginError">
+                <Alert color="danger" data-cy="loginError" fade={false}>
                   <Translate contentKey="login.messages.error.authentication">
                     <strong>Failed to sign in!</strong> Please check your credentials and try again.
                   </Translate>
+                </Alert>
+              ) : null}
+              {errorRecaptcha ? (
+                <Alert color="danger" data-cy="recaptchaError" fade={false}>
+                  <strong>¡Error de reCAPTCHA!</strong> {errorRecaptcha}
                 </Alert>
               ) : null}
             </Col>
@@ -81,12 +100,12 @@ const LoginModal = (props: ILoginModalProps) => {
             </Col>
           </Row>
           <div className="mt-1">&nbsp;</div>
-          <Alert color="warning">
+          <Alert color="warning" fade={false}>
             <Link to="/account/reset/request" data-cy="forgetYourPasswordSelector">
               <Translate contentKey="login.password.forgot">Did you forget your password?</Translate>
             </Link>
           </Alert>
-          <Alert color="warning">
+          <Alert color="warning" fade={false}>
             <span>
               <Translate contentKey="global.messages.info.register.noaccount">You don&apos;t have an account yet?</Translate>
             </span>{' '}
@@ -99,8 +118,12 @@ const LoginModal = (props: ILoginModalProps) => {
           <Button color="secondary" onClick={handleClose} tabIndex={1}>
             <Translate contentKey="entity.action.cancel">Cancel</Translate>
           </Button>{' '}
-          <Button color="primary" type="submit" data-cy="submit">
-            <Translate contentKey="login.form.button">Sign in</Translate>
+          <Button color="primary" type="submit" data-cy="submit" disabled={isSubmitting || isLoadingRecaptcha}>
+            {isSubmitting || isLoadingRecaptcha ? (
+              <Translate contentKey="login.form.button.loading">Checking...</Translate>
+            ) : (
+              <Translate contentKey="login.form.button">Sign in</Translate>
+            )}
           </Button>
         </ModalFooter>
       </Form>
