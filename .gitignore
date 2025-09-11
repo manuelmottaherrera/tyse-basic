@@ -156,3 +156,4 @@ coverage/
 # Custome files
 ######################
 package-lock.json
+.env
