@@ -5,6 +5,15 @@ import { NavItem, NavLink, NavbarBrand } from 'reactstrap';
 import { NavLink as Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { IThemeProps } from 'app/shared/interfaces/ThemeProps';
+import ToggleTheme from 'app/shared/components/toggle-theme/toggle-theme';
+
+export const Theme = (themeProps: IThemeProps) => (
+  <div>
+    <ToggleTheme theme={themeProps.theme} onTheme={themeProps.onTheme} />
+  </div>
+);
+
 export const BrandIcon = props => (
   <div {...props} className="brand-icon">
     <img src="content/images/TySE_LOGO_48x48.png" alt="Logo" />

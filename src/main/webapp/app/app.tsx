@@ -2,7 +2,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './app.scss';
 import 'app/config/dayjs';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'reactstrap';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
@@ -35,21 +35,23 @@ export const App = () => {
   const isInProduction = useAppSelector(state => state.applicationProfile.inProduction);
   const isOpenAPIEnabled = useAppSelector(state => state.applicationProfile.isOpenAPIEnabled);
   const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY || '';
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   const paddingTop = '60px';
   return (
     <GoogleReCaptchaProvider
       reCaptchaKey={siteKey}
       scriptProps={{
-        async: false,
+        async: true,
         defer: true,
         appendTo: 'head',
       }}
       language="es"
+      container={{ element: 'recaptcha', parameters: { badge: 'inline', theme } }}
     >
       <BrowserRouter basename={baseHref}>
         <div className="app-container" style={{ paddingTop }}>
-          <ToastContainer position="top-left" className="toastify-container" toastClassName="toastify-toast" />
+          <ToastContainer position="top-left" className="toastify-container" toastClassName="toastify-toast" theme={theme} />
           <ErrorBoundary>
             <Header
               isAuthenticated={isAuthenticated}
@@ -58,6 +60,7 @@ export const App = () => {
               ribbonEnv={ribbonEnv}
               isInProduction={isInProduction}
               isOpenAPIEnabled={isOpenAPIEnabled}
+              themeProps={{ theme, onTheme: setTheme }}
             />
           </ErrorBoundary>
           <div className="container-fluid view-container" id="app-view-container">

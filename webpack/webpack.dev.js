@@ -46,9 +46,13 @@ module.exports = async options =>
     },
     devServer: {
       hot: true,
-      static: {
-        directory: './target/classes/static/',
-      },
+      static: [
+        { directory: './target/classes/static/' },
+        {
+          directory: './target/classes/static/content/css/themes/',
+          publicPath: '/css/themes/',
+        },
+      ],
       port: 9060,
       proxy: [
         {
